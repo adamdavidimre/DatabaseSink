@@ -11,7 +11,10 @@ namespace SqlSink
         private readonly string _databaseType;
         private readonly string _connectionString;
 
-        public DatabaseSink(string databaseType, string connectionString, string insertCommand)
+        public DatabaseSink(
+            string databaseType, 
+            string connectionString, 
+            string insertCommand)
         {
             _insertCommand = insertCommand;
             _connectionString = connectionString;
@@ -44,6 +47,7 @@ namespace SqlSink
             p.Value = value;
             command.Parameters.Add(p);
         }
+
         private void PopulateCommand(IDbCommand command, List<LogEvent> logEvents)
         {
             int counter = 0;
@@ -54,8 +58,11 @@ namespace SqlSink
                 AddParameterToCommand(command, $"@Timestamp{counter}", entry.Timestamp.UtcDateTime);
                 AddParameterToCommand(command, $"@Level{counter}", entry.Level.ToString());
 
-                command.CommandText +=
-                $"INSERT INTO public.logs (\"Timestamp\", \"Level\", \"Message\") VALUES (@Timestamp{counter}, @Level{counter}, @Message{counter});";
+                command.CommandText += _insertCommand
+                   .Replace("@Timestamp", $"@Timestamp{counter}")
+                   .Replace("@Level", $"@Level{counter}")
+                   .Replace("@Message", $"@Message{counter}")
+                   + ";";
                 
                 counter++;
             }

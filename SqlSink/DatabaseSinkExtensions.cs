@@ -10,22 +10,27 @@ namespace SqlSink
             this LoggerSinkConfiguration loggerConfiguration,
             string databaseType,
             string connectionString,
-            string insertCommand)
+            string insertCommand,
+            int batchSizeLimit,
+            int periodSeconds,
+            int queueLimit)
         {
-            var exampleSink = new DatabaseSink(databaseType, connectionString, insertCommand);
+            var exampleSink = new DatabaseSink(
+                databaseType, 
+                connectionString, 
+                insertCommand);
 
             var batchingOptions = new PeriodicBatchingSinkOptions
             {
-                BatchSizeLimit = 100,
-                Period = TimeSpan.FromSeconds(2),
+                BatchSizeLimit = batchSizeLimit,
+                Period = TimeSpan.FromSeconds(periodSeconds),
                 EagerlyEmitFirstEvent = true,
-                QueueLimit = 1000000
+                QueueLimit = queueLimit
             };
 
             var batchingSink = new PeriodicBatchingSink(exampleSink, batchingOptions);
 
             return loggerConfiguration.Sink(batchingSink);
-
         }
     }
 }
