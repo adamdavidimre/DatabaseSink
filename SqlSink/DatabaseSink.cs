@@ -90,17 +90,17 @@ namespace SqlSink
             }
 
             //TODO:
-            // *connection pooling - default supported
-            // -timeout handling -> retry policy, queueing
-            // -sql injection prevention - done, parameters
-            // *batch + flush for performance (timebased)
-            // exception handling
+            // *exception handling
             // *retry policy
-            // *async
-            // -non blocking -> async
-            // -concurrency -> async, pooling
-            // -throttling, rate limit -> timebased batch
-            // 
+            // OK *batch + flush for performance (timebased)
+            // OK *async
+            // OK *connection pooling - default supported
+
+            // OK -timeout handling -> retry policy, queueing
+            // OK -sql injection prevention - done, parameters
+            // OK -non blocking -> async
+            // OK -concurrency -> async, pooling
+            // OK -throttling, rate limit -> timebased batch
         }
         public Task OnEmptyBatchAsync()
         {
