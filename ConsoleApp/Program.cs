@@ -18,10 +18,33 @@ namespace Inheritance
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
-            Log.Information("Hello, Serilog!");
-            Log.Warning("Hello, Serilog!");
-            Log.Error("Hello, Serilog!");
-            Log.Fatal("Hello, Serilog!");
+            Test();
+        }
+
+        static void Test()
+        {
+            int times = 1000;
+            Task task1 = CreateLoggingTask(1, times);
+            Task task2 = CreateLoggingTask(2, times);
+            Task task3 = CreateLoggingTask(3, times);
+            Task task4 = CreateLoggingTask(4, times);
+            Task task5 = CreateLoggingTask(5, times);
+
+            Task.WaitAll(task1, task2, task3, task4, task5);
+        }
+
+        private static Task CreateLoggingTask(int id, int times)
+        {
+            return Task.Run(async () =>
+            {
+                Console.WriteLine($"Start: {id}");
+                for (int i = 0; i < times; i++)
+                {
+                    string text = $"Task {id} - {i}";
+                    Log.Information(text);
+                }
+                Console.WriteLine($"End: {id}");
+            });
         }
     }
 }

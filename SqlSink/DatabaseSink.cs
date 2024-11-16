@@ -27,11 +27,9 @@ namespace SqlSink
             {
                case "oracle":
                     connection = new OracleConnection(connectionString);
-                    //Pooling
                     break;
                 case "postgres":
                     connection = new NpgsqlConnection(connectionString);
-                    //Pooling enabled by default https://www.npgsql.org/doc/basic-usage.html#pooling
                     break;
                 default:
                     throw new ArgumentException("Unsupported database type");
