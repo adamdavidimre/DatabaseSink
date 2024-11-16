@@ -3,19 +3,20 @@ using Oracle.ManagedDataAccess.Client;
 using Serilog.Core;
 using Serilog.Events;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace SqlSink
 {
     public class DatabaseSink : ILogEventSink
     {
-        private IDbConnection _connection;
         private readonly string _insertCommand;
+        private readonly string _databaseType;
+        private readonly string _connectionString;
 
         public DatabaseSink(string databaseType, string connectionString, string insertCommand)
         {
             _insertCommand = insertCommand;
-            _connection = CreateConnection(databaseType, connectionString);
+            _connectionString = connectionString;
+            _databaseType = databaseType;
         }
 
         private IDbConnection CreateConnection(string databaseType, string connectionString)
@@ -46,23 +47,43 @@ namespace SqlSink
             p.Value = value;
             command.Parameters.Add(p);
         }
-
-        public void Emit(LogEvent logEvent)
+        private void PopulateCommand(IDbCommand command, LogEvent logEvent)
         {
-            IDbCommand command = _connection.CreateCommand();
-            command.CommandText = _insertCommand;
-
             //TODO: Implicit limitation
             AddParameterToCommand(command, "@Message", logEvent.RenderMessage());
             AddParameterToCommand(command, "@Timestamp", logEvent.Timestamp.UtcDateTime);
             AddParameterToCommand(command, "@Level", logEvent.Level.ToString());
+        }
 
-            if (_connection.State != ConnectionState.Open)
+        public void Emit(LogEvent logEvent)
+        {
+            IDbConnection connection = default;
+
+            try
             {
-                _connection.Open();
-            }
+                connection = CreateConnection(_databaseType, _connectionString);
 
-            command.ExecuteNonQuery();
+                IDbCommand command = connection.CreateCommand();
+                command.CommandText = _insertCommand;
+
+                PopulateCommand(command, logEvent);
+
+                if (connection.State != ConnectionState.Open)
+                {
+                    connection.Open();
+                }
+
+                command.ExecuteNonQuery();
+                //((DbCommand)command).ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally 
+            {
+                connection.Close();
+            }
 
             //TODO:
             // *connection pooling - default supported
@@ -76,9 +97,6 @@ namespace SqlSink
             // -concurrency -> async, pooling
             // -throttling, rate limit -> timebased batch
             // 
-
-
-
         }
     }
 }
