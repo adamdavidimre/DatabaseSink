@@ -97,7 +97,7 @@ namespace SqlSink
             }
 
             //TODO:
-            // *exception handling
+            // OK -exception handling -> rety policy
             // *retry policy
             // OK *batch + flush for performance (timebased)
             // OK *async
@@ -107,7 +107,7 @@ namespace SqlSink
             // OK -sql injection prevention - done, parameters
             // OK -non blocking -> async
             // OK -concurrency -> async, pooling
-            // OK -throttling, rate limit -> timebased batch
+            // OK -throttling, rate limit -> timebased batch, batch size
         }
 
         public Task OnEmptyBatchAsync()
