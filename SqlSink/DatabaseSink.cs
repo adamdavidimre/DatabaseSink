@@ -109,6 +109,7 @@ namespace SqlSink
             // OK -concurrency -> async, pooling
             // OK -throttling, rate limit -> timebased batch
         }
+
         public Task OnEmptyBatchAsync()
         {
             Console.WriteLine("Empty batch.");

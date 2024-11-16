@@ -4,7 +4,7 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace SqlSink
 {
-    public static class DatabaseSinkExtensions
+    public static class LoggerSinkConfigurationExtension
     {
         public static LoggerConfiguration DatabaseSink(
             this LoggerSinkConfiguration loggerConfiguration,
