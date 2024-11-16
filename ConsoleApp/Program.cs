@@ -19,24 +19,27 @@ namespace Inheritance
                 .CreateLogger();
 
             Test();
+
+            Thread.Sleep(100000);
         }
 
         static void Test()
         {
             int times = 1000;
-            Task task1 = CreateLoggingTask(1, times);
-            Task task2 = CreateLoggingTask(2, times);
-            Task task3 = CreateLoggingTask(3, times);
-            Task task4 = CreateLoggingTask(4, times);
-            Task task5 = CreateLoggingTask(5, times);
+            Task task1 = CreateLoggingTask(1, times, 0);
+            Task task2 = CreateLoggingTask(2, times, 0);
+            Task task3 = CreateLoggingTask(3, times, 0);
+            Task task4 = CreateLoggingTask(4, times, 0);
+            Task task5 = CreateLoggingTask(5, times, 0);
 
             Task.WaitAll(task1, task2, task3, task4, task5);
         }
 
-        private static Task CreateLoggingTask(int id, int times)
+        private static Task CreateLoggingTask(int id, int times, int waitMs)
         {
             return Task.Run(async () =>
             {
+                Thread.Sleep(waitMs);
                 Console.WriteLine($"Start: {id}");
                 for (int i = 0; i < times; i++)
                 {

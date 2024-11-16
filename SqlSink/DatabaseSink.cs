@@ -2,11 +2,14 @@
 using Oracle.ManagedDataAccess.Client;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Sinks.PeriodicBatching;
 using System.Data;
+using System.Data.Common;
+using System.Diagnostics.Metrics;
 
 namespace SqlSink
 {
-    public class DatabaseSink : ILogEventSink
+    public class DatabaseSink : Serilog.Sinks.PeriodicBatching.IBatchedLogEventSink
     {
         private readonly string _insertCommand;
         private readonly string _databaseType;
@@ -45,26 +48,36 @@ namespace SqlSink
             p.Value = value;
             command.Parameters.Add(p);
         }
-        private void PopulateCommand(IDbCommand command, LogEvent logEvent)
+        private void PopulateCommand(IDbCommand command, List<LogEvent> logEvents)
         {
-            //TODO: Implicit limitation
-            AddParameterToCommand(command, "@Message", logEvent.RenderMessage());
-            AddParameterToCommand(command, "@Timestamp", logEvent.Timestamp.UtcDateTime);
-            AddParameterToCommand(command, "@Level", logEvent.Level.ToString());
+            int counter = 0;
+
+            foreach (var entry in logEvents)
+            {
+                AddParameterToCommand(command, $"@Message{counter}", entry.RenderMessage());
+                AddParameterToCommand(command, $"@Timestamp{counter}", entry.Timestamp.UtcDateTime);
+                AddParameterToCommand(command, $"@Level{counter}", entry.Level.ToString());
+
+                command.CommandText +=
+                $"INSERT INTO public.logs (\"Timestamp\", \"Level\", \"Message\") VALUES (@Timestamp{counter}, @Level{counter}, @Message{counter});";
+                
+                counter++;
+            }
         }
 
-        public void Emit(LogEvent logEvent)
+        public async Task EmitBatchAsync(IEnumerable<LogEvent> batch)
         {
             IDbConnection connection = default;
+
+            Console.WriteLine($"Get batch: {batch.Count()}");
 
             try
             {
                 connection = CreateConnection(_databaseType, _connectionString);
 
                 IDbCommand command = connection.CreateCommand();
-                command.CommandText = _insertCommand;
 
-                PopulateCommand(command, logEvent);
+                PopulateCommand(command, batch.ToList());
 
                 if (connection.State != ConnectionState.Open)
                 {
@@ -72,7 +85,6 @@ namespace SqlSink
                 }
 
                 command.ExecuteNonQuery();
-                //((DbCommand)command).ExecuteNonQueryAsync();
             }
             catch (Exception ex)
             {
@@ -95,6 +107,12 @@ namespace SqlSink
             // -concurrency -> async, pooling
             // -throttling, rate limit -> timebased batch
             // 
+        }
+        public Task OnEmptyBatchAsync()
+        {
+            Console.WriteLine("Empty batch.");
+
+            return Task.CompletedTask;
         }
     }
 }
