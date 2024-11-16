@@ -18,14 +18,14 @@ namespace Inheritance
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
-            Test();
+            TestNoStop5ThreadPer10000();
 
             Thread.Sleep(100000);
         }
 
-        static void Test()
+        static void TestNoStop5ThreadPer10000()
         {
-            int times = 1000;
+            int times = 10000;
             Task task1 = CreateLoggingTask(1, times, 0);
             Task task2 = CreateLoggingTask(2, times, 0);
             Task task3 = CreateLoggingTask(3, times, 0);

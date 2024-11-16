@@ -1,11 +1,7 @@
 ﻿using Npgsql;
 using Oracle.ManagedDataAccess.Client;
-using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.PeriodicBatching;
 using System.Data;
-using System.Data.Common;
-using System.Diagnostics.Metrics;
 
 namespace SqlSink
 {
@@ -68,8 +64,6 @@ namespace SqlSink
         public async Task EmitBatchAsync(IEnumerable<LogEvent> batch)
         {
             IDbConnection connection = default;
-
-            Console.WriteLine($"Get batch: {batch.Count()}");
 
             try
             {

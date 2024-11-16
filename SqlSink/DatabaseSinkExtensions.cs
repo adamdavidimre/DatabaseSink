@@ -19,7 +19,7 @@ namespace SqlSink
                 BatchSizeLimit = 100,
                 Period = TimeSpan.FromSeconds(2),
                 EagerlyEmitFirstEvent = true,
-                QueueLimit = 10000
+                QueueLimit = 1000000
             };
 
             var batchingSink = new PeriodicBatchingSink(exampleSink, batchingOptions);
